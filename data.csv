@@ -1,8 +1,8 @@
-Country;Size;Fakenew index 
-France;1;0,2
-Belgique;2;0,5
-Chine;8;0,1
-Suede;9;0,3
-Coree;1;0,8
-EU;3;0,7
-Royaume-Uni;5;0,6
+Country;x;y;size
+France;102;1;0.0003149387
+Belgique;103;1;0.0003149386
+Chine;108;1;0.0003149387
+Suede;109;1;0.0003149387
+Coree;133;1;0.008578668
+EU;110;1;0.0003149387
+Royaume-Uni;112;1;0.0003149387
