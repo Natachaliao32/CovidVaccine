@@ -222,7 +222,7 @@
         // merge with main model
         // THREE.GeometryUtils.merge(geom, cube); deprecated
         cube.updateMatrix();
-        cgeo.merge(cube.geometry, cube.matrix);
+        geom.merge(cube.geometry, cube.matrix);
       }
 
       // create a new mesh, containing all the other meshes.
