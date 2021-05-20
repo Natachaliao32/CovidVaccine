@@ -1,99 +1,113 @@
 <html>
-
 <head>
-  <title>My first three.js</title>
-  <style>
-    body {
-      margin: 0;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%
-    }
-  </style>
+    <title>My first three.js</title>
+    <style>
+        body { margin: 0; }
+        canvas { width: 100%; height: 100% }
+    </style>
 </head>
-
 <body>
-  <div id="globe"></div>
-  <script src="js/three.js"></script>
-  <script language="JavaScript" type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+<script src="js/three.js"></script>
+<script type="module" src="js/OrbitControls.js"></script>
 
-  <script>
+<script>
 
-    // couple of constants
-    var POS_X = 1800;
-    var POS_Y = 500;
-    var POS_Z = 1800;
-    var WIDTH = 1000;
-    var HEIGHT = 600;
-
-    var FOV = 45;
-    var NEAR = 1;
-    var FAR = 4000;
-
-    // some global variables and initialization code
-    // simple basic renderer
-    var renderer = new THREE.WebGLRenderer();
-    renderer.setSize(WIDTH, HEIGHT);
-    renderer.setClearColor(0x111111);
-
-    // add it to the target element
-    var mapDiv = document.getElementById("globe");
-    mapDiv.appendChild(renderer.domElement);
-
-    // setup a camera that points to the center
-    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
-    camera.position.set(POS_X, POS_Y, POS_Z);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-
-    // create a basic scene and add the camera
+    //Initialisation//
     var scene = new THREE.Scene();
-    scene.add(camera);
+    var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    document.body.appendChild( renderer.domElement );
+    camera.position.set(0,0,15);
 
-    // we wait until the document is loaded before loading the
-    // density data.
-    $(document).ready(function () {
-      jQuery.get('data.csv', function (data) {
-        addLights();
-        addEarth();
-        addClouds();
-        //render();
-      });
+
+
+    //Création de la lumière
+
+    //Ambiante
+    var light = new THREE.AmbientLight( 0x888888 );
+    scene.add( light );
+
+    //Directionelle
+    var light = new THREE.DirectionalLight( 0xfdfcf0, 1 );
+    light.position.set(20,10,20);
+    scene.add( light );
+
+
+
+
+    //Genèse
+
+
+   //Création geometry and material Terre
+    var earthGeometry = new THREE.SphereGeometry( 5, 50, 50 );
+    var earthMaterial = new THREE.MeshPhongMaterial({
+        map: new THREE.TextureLoader().load("textures/2_no_clouds_4k.jpg"),
+        color: 0xaaaaaa,
+        specular: 0x333333,
+        shininess: 25
     });
 
-    // add the earth
-    function addEarth() {
-      var spGeo = new THREE.SphereGeometry(600, 50, 50);
-      var planetTexture =  new THREE.TextureLoader().load("textures/2_no_clouds_4k.jpg")//THREE.ImageUtils.loadTexture("textures/2_no_clouds_4K.jpg");
-      var mat2 = new THREE.MeshPhongMaterial({
-        map: planetTexture,
-        shininess: 0.2
-      });
-      sp = new THREE.Mesh(spGeo, mat2);
-      scene.add(sp);
-    }
 
-    // add clouds
-    function addClouds() {
-      var spGeo = new THREE.SphereGeometry(600, 50, 50);
-      var cloudsTexture =  new THREE.ImageUtils.loadTexture("textures/fair_clouds_4k.png");
-      var materialClouds = new THREE.MeshPhongMaterial({ color: 0xffffff, map: cloudsTexture, transparent: true, opacity: 0.3 });
+    //Création geometry and material Nuages
+    var cloudGeometry = new THREE.SphereGeometry(5.05,  50, 50);
+    var cloudMaterial = new THREE.MeshPhongMaterial({
+        map: new THREE.ImageUtils.loadTexture("textures/fair_clouds_4k.png"),
+        transparent: true,
+        opacity: 0.8
+    });
 
-      meshClouds = new THREE.Mesh(spGeo, materialClouds);
-      meshClouds.scale.set(1.015, 1.015, 1.015);
-      scene.add(meshClouds);
-    }
+    //Création geometry and material Bump
+    var bumpGeometry = new THREE.SphereGeometry(5,  50, 50);
+    var bumpMaterial = new THREE.MeshPhongMaterial({
+        map: new THREE.ImageUtils.loadTexture("textures/elev_bump_4k.jpg"),
+        transparent: true,
+        opacity: 0.2,
+    });
 
-    // add a simple light
-    function addLights() {
-        light = new THREE.DirectionalLight(0x3333ee, 3.5, 500 );
-        scene.add( light );
-        light.position.set(POS_X,POS_Y,POS_Z);
-    }
+    //Création geometry and material Etoiles
+    var starGeometry = new THREE.SphereGeometry(200, 50, 50);
+    var starMaterial = new THREE.MeshPhongMaterial({
+        map: new THREE.ImageUtils.loadTexture("textures/2048x1024.png"),
+        side: THREE.DoubleSide,
+        shininess: 0
+    });
 
-  </script>
 
+
+    //Construction & Ajout du mesh Terre Nuages Bump Etoiles (le mix entre la structure géométrique et la texture) à la scène
+
+
+
+    var star = new THREE.Mesh(starGeometry, starMaterial);
+    scene.add(star);
+
+
+    var earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    scene.add(earth);
+
+    var clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    scene.add(clouds);
+
+    var bump = new THREE.Mesh(bumpGeometry, bumpMaterial);
+    scene.add(bump);
+
+
+    //Orbit Controls
+    // var orbit = new THREE.OrbitControls( camera, renderer.domElement );
+
+    //Render loop
+    var render = function() {
+        earth.rotation.y += .0015;
+        clouds.rotation.y += .0025;
+        clouds.rotation.z += .00125;
+        bump.rotation.y += .0015;
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    };
+    render();
+
+</script>
 </body>
-
 </html>
