@@ -226,7 +226,7 @@
       }
 
       // create a new mesh, containing all the other meshes.
-      var total = new THREE.Mesh(geom, new THREE.MeshFaceMaterial());
+      var total = new THREE.Mesh(geom, []); // new THREE.MeshFaceMaterial() removed, use array instead
 
       // and add the total mesh to the scene
       scene.add(total);
