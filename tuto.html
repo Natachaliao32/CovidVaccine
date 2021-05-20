@@ -52,7 +52,7 @@
     //Création geometry and material Nuages
     var cloudGeometry = new THREE.SphereGeometry(5.05,  50, 50);
     var cloudMaterial = new THREE.MeshPhongMaterial({
-        map: new THREE.ImageUtils.loadTexture("textures/fair_clouds_4k.png"),
+        map: new THREE.TextureLoader().load("textures/fair_clouds_4k.png"),
         transparent: true,
         opacity: 0.8
     });
@@ -60,7 +60,7 @@
     //Création geometry and material Bump
     var bumpGeometry = new THREE.SphereGeometry(5,  50, 50);
     var bumpMaterial = new THREE.MeshPhongMaterial({
-        map: new THREE.ImageUtils.loadTexture("textures/elev_bump_4k.jpg"),
+        map: new THREE.TextureLoader().load("textures/elev_bump_4k.jpg"),
         transparent: true,
         opacity: 0.2,
     });
@@ -68,7 +68,7 @@
     //Création geometry and material Etoiles
     var starGeometry = new THREE.SphereGeometry(200, 50, 50);
     var starMaterial = new THREE.MeshPhongMaterial({
-        map: new THREE.ImageUtils.loadTexture("textures/2048x1024.png"),
+        map: new THREE.TextureLoader().load("textures/2048x1024.png"),
         side: THREE.DoubleSide,
         shininess: 0
     });
