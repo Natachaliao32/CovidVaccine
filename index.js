@@ -32,7 +32,7 @@ scene.add(camera);
 // density data.
 $(document).ready(function()  {
     jQuery.get('data.csv', function(data) {
-        addDensity(CSVToArray(data));
+        //addDensity(CSVToArray(data));
         addLights();
         addEarth();
         addClouds();
