@@ -213,7 +213,7 @@
         var position = latLongToVector3(y, x, 600, 2);
 
         // create the cube
-        var cube = new THREE.Mesh(new THREE.CubeGeometry(5, 5, 1 + value / 8, 1, 1, 1, cubeMat));
+        var cube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 1 + value / 8, 1, 1, 1, cubeMat)); // CubeGeometry deprecated
 
         // position the cube correctly
         cube.position = position;
