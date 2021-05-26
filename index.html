@@ -207,7 +207,7 @@
         //from the data aren't in the correct format
         var x = parseInt(data[i][0]) + 180;
         var y = parseInt((data[i][1]) - 84) * -1;
-        var value = parseFloat(data[i][2]);
+        var value = 1000 // parseFloat(data[i][2]);
 
         // calculate the position where we need to start the cube
         var position = latLongToVector3(y, x, 600, 2);
