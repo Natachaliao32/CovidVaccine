@@ -90,16 +90,20 @@
 
     // add a simple light
     function addLights() {
+      //Ambiante
+      light = new THREE.AmbientLight( 0x888888 );
+      scene.add( light );
+
       light = new THREE.DirectionalLight(0x3333ee, 3.5, 500);
-      scene.add(light);
       light.position.set(POS_X, POS_Y, POS_Z);
+      scene.add(light);
     }
 
     // convert CVS file to array
     function CSVToArray(strData, strDelimiter) {
       // Check to see if the delimiter is defined. If not,
       // then default to comma.
-      strDelimiter = (strDelimiter || ",");
+      strDelimiter = (strDelimiter || ";");
 
       // Create a regular expression to parse the CSV values.
       var objPattern = new RegExp(
@@ -200,36 +204,39 @@
       var geom = new THREE.BufferGeometry(); //THREE.Geometry();
       // material to use for each of our elements. Could use a set of materials to
       // add colors relative to the density. Not done here.
-      var cubeMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.6, emissive: 0xffffff });
+      var cubeMat = new THREE.MeshLambertMaterial({ color: 0xFFFF00, opacity: 0.6, emissive: 0xffffff });
       for (var i = 1; i < data.length - 1; i++) {
 
         //get the data, and set the offset, we need to do this since the x,y coordinates
         //from the data aren't in the correct format
-        var x = parseInt(data[i][0]) + 180;
-        var y = parseInt((data[i][1]) - 84) * -1;
-        var value = 1000 // parseFloat(data[i][2]);
+        var x = parseInt(data[i][1]); // parseInt(data[i][0]) + 180; // long
+        var y = parseInt(data[i][2]); //parseInt((data[i][1]) - 84) * -1; // lat
+        var value = 10000 * parseFloat(data[i][3]); // parseFloat(data[i][2]);
+        console.log('x : ' + data[i][1] + ' / y : ' + data[i][2]);
 
         // calculate the position where we need to start the cube
         var position = latLongToVector3(y, x, 600, 2);
 
         // create the cube
-        var cube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 1 + value / 8, 1, 1, 1, cubeMat)); // CubeGeometry deprecated
+        // var cube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 1 + value / 8, 1, 1, 1, cubeMat)); // CubeGeometry deprecated
+        var cubegeo = new THREE.BoxGeometry( 10, 10, 1 + value / 8, 1, 1, 1 );
+        var cube = new THREE.Mesh( cubegeo, cubeMat );
 
         // position the cube correctly
-        cube.position = position;
+        cube.position.set( position.x, position.y, position.z ); // position;
         cube.lookAt(new THREE.Vector3(0, 0, 0));
 
         // merge with main model
         // THREE.GeometryUtils.merge(geom, cube); deprecated
         cube.updateMatrix();
         geom.merge(cube.geometry, cube.matrix);
+        scene.add(cube)
       }
 
       // create a new mesh, containing all the other meshes.
       var total = new THREE.Mesh(geom, []); // new THREE.MeshFaceMaterial() removed, use array instead
-
       // and add the total mesh to the scene
-      scene.add(total);
+      // scene.add(total);
     }
 
     // render
