@@ -1,8 +1,8 @@
-Country;x;y;size
-France;2.3488000;48.8534100;1
-Belgique;48.8534100;2.3488000;0.5
-Chine;108;1;0.0003149387
-Suede;109;1;0.0003149387
-Coree;133;1;0.008578668
-EU;110;1;0.0003149387
-Royaume-Uni;112;1;0.0003149387
+Country;x (longitude);y (latitude);Nb vaccinated;Nb fakenews
+France;2.213749;46.227638;4,30E+06;3
+Belgique;0;0;2,00E+06;20
+Chine; 116.39723;39.9075;3,00E+06;5
+Suede;109;1;5,00E+05;12
+Coree;133;150;2,00E+05;4
+EU;-74,00597;40,71427;1,00E+06;34
+Royaume-Uni;200;25;1,00E+06;5

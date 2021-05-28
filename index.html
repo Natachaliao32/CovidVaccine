@@ -5,11 +5,13 @@
   <style>
     body {
       margin: 0;
+      background: linear-gradient(#9EE8FF, #BDF4C3);
     }
 
     canvas {
-      width: 100%;
-      height: 100%
+      /* width: 100%; */
+      /* height: 100% */
+      margin: 0 auto;
     }
   </style>
 </head>
@@ -25,8 +27,11 @@
     var POS_X = 1800;
     var POS_Y = 500;
     var POS_Z = 1800;
-    var WIDTH = 1000;
-    var HEIGHT = 600;
+    // var WIDTH = 1000;
+    // var HEIGHT = 600;
+    var PLANETRADIUS = 400;
+    var WIDTH = window.innerWidth;
+    var HEIGHT = window.innerHeight;
 
     var FOV = 45;
     var NEAR = 1;
@@ -34,16 +39,21 @@
 
     // some global variables and initialization code
     // simple basic renderer
-    var renderer = new THREE.WebGLRenderer();
+    var renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(WIDTH, HEIGHT);
-    renderer.setClearColor(0x111111);
+    renderer.setClearColor(0x000000, 0);
+    // turn on shadows
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
     // add it to the target element
     var mapDiv = document.getElementById("globe");
     mapDiv.appendChild(renderer.domElement);
 
     // setup a camera that points to the center
-    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
+    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);    
+    // var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
+
     camera.position.set(POS_X, POS_Y, POS_Z);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
@@ -56,8 +66,6 @@
     $(document).ready(function () {
       jQuery.get('data.csv', function (data) {
         addDensity(CSVToArray(data));
-        console.log(CSVToArray(data));
-        console.log(CSVToArray(data).length);
         addLights();
         addEarth();
         addClouds();
@@ -67,19 +75,22 @@
 
     // add the earth
     function addEarth() {
-      var spGeo = new THREE.SphereGeometry(600, 50, 50);
-      var planetTexture = new THREE.TextureLoader().load("textures/2_no_clouds_4k.jpg")//THREE.ImageUtils.loadTexture("textures/2_no_clouds_4K.jpg");
+      var spGeo = new THREE.SphereGeometry(PLANETRADIUS, 50, 50);
+      var planetTexture = new THREE.TextureLoader().load("textures/earthmap.png")//THREE.ImageUtils.loadTexture("textures/2_no_clouds_4K.jpg");
       var mat2 = new THREE.MeshPhongMaterial({
         map: planetTexture,
         shininess: 0.2
       });
       sp = new THREE.Mesh(spGeo, mat2);
+      // receive shadow and does not cast
+      sp.receiveShadow = true; //default
+      sp.castShadow = true;
       scene.add(sp);
     }
 
     // add clouds
     function addClouds() {
-      var spGeo = new THREE.SphereGeometry(600, 50, 50);
+      var spGeo = new THREE.SphereGeometry(PLANETRADIUS, 50, 50);
       var cloudsTexture = new THREE.ImageUtils.loadTexture("textures/fair_clouds_4k.png");
       var materialClouds = new THREE.MeshPhongMaterial({ color: 0xffffff, map: cloudsTexture, transparent: true, opacity: 0.3 });
 
@@ -94,9 +105,20 @@
       light = new THREE.AmbientLight( 0x888888 );
       scene.add( light );
 
-      light = new THREE.DirectionalLight(0x3333ee, 3.5, 500);
+      light = new THREE.DirectionalLight(0xffffff, 0.5);
+      light.castShadow = true;
       light.position.set(POS_X, POS_Y, POS_Z);
       scene.add(light);
+      //Set up shadow properties for the light
+      light.shadow.mapSize.width = 512; // default
+      light.shadow.mapSize.height = 512; // default
+      light.shadow.camera.near = 0.5; // default
+      light.shadow.camera.far = 4000; // default
+
+      
+      //Create a helper for the shadow camera (optional)
+      // const helper = new THREE.CameraHelper( light.shadow.camera );
+      // scene.add( helper );
     }
 
     // convert CVS file to array
@@ -195,6 +217,38 @@
       return new THREE.Vector3(x, y, z);
     }
 
+    function createCustomCylinder(size, radius, mat, position) {
+      var geo = new THREE.CylinderGeometry(radius, radius, size, 10, 1);
+      geo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, -size/2, 0 ) );
+      geo.applyMatrix4( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+      var cylinder = new THREE.Mesh(geo, mat);
+      cylinder.castShadow = true;
+      cylinder.receiveShadow = true; //default
+      cylinder.position.set( position.x, position.y, position.z );
+      cylinder.lookAt(new THREE.Vector3(0, 0, 0));
+      scene.add(cylinder);
+    }
+
+    function getCol(matrix, col){
+       var column = [];
+       for(var i=0; i<matrix.length; i++){
+          column.push(matrix[i][col]);
+       }
+       return column;
+    }
+
+    function getMaxFakenewsIndex(v, f) {
+      var max = -1;
+      var r = [-1];
+      for(var i = 1; i < v.length - 1 ; i++) {
+        if(typeof v[i] === "number") {
+          r.push(f[i] / v[i]);
+          max = r[i-1] > r[i] ? r[i-1] : r[i];
+        }
+      }
+      return max;
+    }
+
     // simple function that converts the density data to the markers on screen
     // the height of each marker is relative to the density.
     // takes into account one line of category titles
@@ -202,39 +256,119 @@
 
       // the geometry that will contain all our cubes
       var geom = new THREE.BufferGeometry(); //THREE.Geometry();
-      // material to use for each of our elements. Could use a set of materials to
-      // add colors relative to the density. Not done here.
-      var cubeMat = new THREE.MeshLambertMaterial({ color: 0xFFFF00, opacity: 0.6, emissive: 0xffffff });
+
+      // get max size
+      var vcpy = getCol(data, 3).slice();
+      vcpy.shift();
+      vcpy.pop();
+      var vcpy2 = vcpy.map(x => parseFloat(x.replace(',', '.')));
+      var vmax = Math.max(...vcpy2);
+      console.log("vmax : "+vmax);
+
+      // get max fakenews index
+      var fcpy = getCol(data, 4).slice();
+      fcpy.shift();
+      fcpy.pop();
+      var fcpy2 = fcpy.map(x => parseFloat(x.replace(',', '.')));
+      var fmax = getMaxFakenewsIndex(vcpy2, fcpy2);
+      console.log("fmax : "+fmax);
+
       for (var i = 1; i < data.length - 1; i++) {
 
-        //get the data, and set the offset, we need to do this since the x,y coordinates
-        //from the data aren't in the correct format
-        var x = parseInt(data[i][1]); // parseInt(data[i][0]) + 180; // long
-        var y = parseInt(data[i][2]); //parseInt((data[i][1]) - 84) * -1; // lat
-        var value = 10000 * parseFloat(data[i][3]); // parseFloat(data[i][2]);
-        console.log('x : ' + data[i][1] + ' / y : ' + data[i][2]);
+        var padding = 5;
+        var glass = new THREE.MeshLambertMaterial({ color: 0xffffff, opacity: 0.1, emissive: 0xffffff, transparent: true });
+        var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.6, emissive: 0x363636 });
 
-        // calculate the position where we need to start the cube
-        var position = latLongToVector3(y, x, 600, 2);
+        // syringe body
+        // get the data
+        var x = parseInt(data[i][1]); // longitude
+        var y = parseInt(data[i][2]); // latitude
+        var nbvaccinated = parseFloat(data[i][3].replace(',', '.'));
+        // syringe body size goes from 10 to 510
+        var size = 10 + 500 / vmax * nbvaccinated;
+        var findex = parseFloat(data[i][4].replace(',', '.')) / nbvaccinated / fmax;
+        // color
+        var syrbodyMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.6, emissive: 0x000000 });
+        var syrbodyColor = new THREE.Color("#90E0EF"); // blue
+        syrbodyColor.lerp(new THREE.Color("#EE2E31"), findex);
+        syrbodyMat.color.set(syrbodyColor);
+        // radius
+        var radius = 10;
+        // calculate the position where we need to start the body of the syringe
+        var position = latLongToVector3(y, x, PLANETRADIUS + needlesize + padding, 2);
+
+        createCustomCylinder(size, radius, syrbodyMat, position);
+
+        // glass container
+        var containersize = size+padding+20;
+        var containeradius = radius+padding;
+        var containerposition = latLongToVector3(y, x, PLANETRADIUS + needlesize, 2);
+        createCustomCylinder(containersize, containeradius, glass, containerposition);
+
+        // glass plunger (tube)
+        var plungertsize = 20;
+        var plungertradius = 10;
+        var plungertposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize, 2);
+        createCustomCylinder(plungertsize, plungertradius, glass, plungertposition);
+
+        // glass plunger (extremity)
+        var plungeresize = 5;
+        var plungereradius = containeradius;
+        var plungereposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize + plungertsize, 2);
+        createCustomCylinder(plungeresize, plungereradius, glass, plungereposition);
+
+        // needle
+        var needlesize = 20;
+        var needleradius = 2;
+        var needleposition = latLongToVector3(y, x, PLANETRADIUS, 2);
+        createCustomCylinder(needlesize, needleradius, metal, needleposition);
+
+        // var needlegeo = new THREE.CylinderGeometry(needleradius, needleradius, needlesize, 10, 1);
+        // needlegeo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, needlesize/2, 0 ) );
+        // needlegeo.applyMatrix4( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+        // var needle = new THREE.Mesh(needlegeo, needlemat);
+        // needle.position.set( position.x, position.y, position.z ); // position;
+        // needle.lookAt(new THREE.Vector3(0, 0, 0));
+        // scene.add(needle);
 
         // create the cube
-        // var cube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 1 + value / 8, 1, 1, 1, cubeMat)); // CubeGeometry deprecated
-        var cubegeo = new THREE.BoxGeometry( 10, 10, 1 + value / 8, 1, 1, 1 );
-        var cube = new THREE.Mesh( cubegeo, cubeMat );
+        // var cube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 1 + size / 8, 1, 1, 1, cubeMat)); // CubeGeometry deprecated
+        // var cubegeo = new THREE.BoxGeometry( 10, 10, 1 + size / 8, 1, 1, 1 );
+        // var cubegeo = new THREE.CylinderGeometry( radius, radius, size, 10, 1 );
+        // cubegeo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, 1-size/2, 0 ) );
+        // cubegeo.applyMatrix4( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+        // var cube = new THREE.Mesh( cubegeo, cubeMat );
 
         // position the cube correctly
-        cube.position.set( position.x, position.y, position.z ); // position;
-        cube.lookAt(new THREE.Vector3(0, 0, 0));
+        // cube.position.set( position.x, position.y, position.z ); // position;
+
+        // cube.lookAt(new THREE.Vector3(0, 0, 0));
+
+        // console.log(size+" / "+radius+" / "+position.x+" / "+position.y+" / "+position.z);
+
+
+        // merge
+        // var singleGeometry = new THREE.BufferGeometry();
+        // cube.updateMatrix();
+        // singleGeometry.merge(cube.geometry, cube.matrix);
+        // needle.updateMatrix();
+        // singleGeometry.merge(needle.geometry, needle.matrix);
+        // var syringe = new THREE.Mesh(singleGeometry, cubeMat); // new THREE.MeshFaceMaterial() removed, use array instead
+        // scene.add(syringe);
 
         // merge with main model
         // THREE.GeometryUtils.merge(geom, cube); deprecated
-        cube.updateMatrix();
-        geom.merge(cube.geometry, cube.matrix);
-        scene.add(cube)
+        // cube.updateMatrix();
+
+        // console.log(cube.geometry);
+        // geom.merge(cube.geometry, cube.matrix);
+        // geom.merge(cube.geometry);
+        // THREE.BufferGeometryUtils.mergeBufferGeometries([geom, cube.geometry]);
+        // scene.add(cube)
       }
 
       // create a new mesh, containing all the other meshes.
-      var total = new THREE.Mesh(geom, []); // new THREE.MeshFaceMaterial() removed, use array instead
+      // var total = new THREE.Mesh(geom, new THREE.MeshLambertMaterial({ color: 0xff000 })); // new THREE.MeshFaceMaterial() removed, use array instead
       // and add the total mesh to the scene
       // scene.add(total);
     }
@@ -245,7 +379,7 @@
       camera.position.x = (Math.cos(timer) * 1800);
       camera.position.z = (Math.sin(timer) * 1800);
       camera.lookAt(scene.position);
-      light.position = camera.position;
+      // light.position = camera.position;
       light.lookAt(scene.position);
       renderer.render(scene, camera);
       requestAnimationFrame(render);
