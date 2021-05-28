@@ -1,27 +1,67 @@
 <html>
 
 <head>
-  <title>GRAPH</title>
+  <title>Do fakenews impact vaccination rates?</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+
+    :root {
+      --turquoise: #57BACF;
+      --turquoise-fonce: #007AA0;
+      --bleu-clair: #90E0EF;
+      --vert: #BDF4C3;
+      --rouge: #EE2E31;
+
+    }
+
     body {
       margin: 0;
-      background: linear-gradient(#9EE8FF, #BDF4C3);
+      background: linear-gradient(#9EE8FF, var(--vert));
     }
 
     canvas {
-      /* width: 100%; */
-      /* height: 100% */
-      margin: 0 auto;
+      /* margin: 0 auto; */
+      z-index: 99;
+    }
+
+    #globe {
+      position: absolute;
+      /* top: 0.5vh;
+      left: 0.5vw; */
+      z-index: 99;
+    }
+
+    .title {
+      position: absolute;
+      top: 2em;
+      left: 3em;
+    }
+
+    .title>h1 {
+      font-family: Playfair Display;
+      color: var(--turquoise);
+      font-size: 90px;
+      margin: 0;
     }
   </style>
 </head>
 
 <body>
+
   <div id="globe"></div>
+  <div class="title">
+    <h1>Do fakenews impact</h1>
+    <h1>vaccination</h1>
+    <h1>rates?</h1>
+  </div>
+
   <script src="js/three.js"></script>
   <script language="JavaScript" type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
 
-  <script>
+  <script type="module">
+    // import * as THREE from './node_modules/three/src/Three.js';
+    // import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+    import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 
     // couple of constants
     var POS_X = 1800;
@@ -51,24 +91,42 @@
     mapDiv.appendChild(renderer.domElement);
 
     // setup a camera that points to the center
-    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);    
+    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
     // var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
+
+    var controls = new OrbitControls( camera, renderer.domElement );
+    controls.minDistance = 1200;
+    controls.maxDistance = 3000;
 
     camera.position.set(POS_X, POS_Y, POS_Z);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
+    controls.update();
 
     // create a basic scene and add the camera
     var scene = new THREE.Scene();
     scene.add(camera);
 
+    var manager = new THREE.LoadingManager();
+
+    // load font
+    var loader = new THREE.FontLoader(manager);
+    var font = null;
+    loader.load('fonts/' + 'PlayfairDisplay' + '.json', function (response) {
+      console.log("font loaded");
+      font = response;
+    });
+
     // we wait until the document is loaded before loading the
     // density data.
     $(document).ready(function () {
       jQuery.get('data.csv', function (data) {
-        addDensity(CSVToArray(data));
+        manager.onLoad = function () { // when all resources are loaded
+          console.log("ready!");
+          addDensity(CSVToArray(data));
+        }
         addLights();
         addEarth();
-        addClouds();
+        // addClouds();
         render();
       });
     });
@@ -81,7 +139,7 @@
         map: planetTexture,
         shininess: 0.2
       });
-      sp = new THREE.Mesh(spGeo, mat2);
+      var sp = new THREE.Mesh(spGeo, mat2);
       // receive shadow and does not cast
       sp.receiveShadow = true; //default
       sp.castShadow = true;
@@ -102,20 +160,13 @@
     // add a simple light
     function addLights() {
       //Ambiante
-      light = new THREE.AmbientLight( 0x888888 );
-      scene.add( light );
+      var light = new THREE.AmbientLight(0x999999);
+      scene.add(light);
 
-      light = new THREE.DirectionalLight(0xffffff, 0.5);
-      light.castShadow = true;
+      light = new THREE.DirectionalLight(0xffffff, 0.3);
       light.position.set(POS_X, POS_Y, POS_Z);
       scene.add(light);
-      //Set up shadow properties for the light
-      light.shadow.mapSize.width = 512; // default
-      light.shadow.mapSize.height = 512; // default
-      light.shadow.camera.near = 0.5; // default
-      light.shadow.camera.far = 4000; // default
 
-      
       //Create a helper for the shadow camera (optional)
       // const helper = new THREE.CameraHelper( light.shadow.camera );
       // scene.add( helper );
@@ -219,34 +270,60 @@
 
     function createCustomCylinder(size, radius, mat, position) {
       var geo = new THREE.CylinderGeometry(radius, radius, size, 10, 1);
-      geo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, -size/2, 0 ) );
-      geo.applyMatrix4( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
+      geo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -size / 2, 0));
+      geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
       var cylinder = new THREE.Mesh(geo, mat);
       cylinder.castShadow = true;
       cylinder.receiveShadow = true; //default
-      cylinder.position.set( position.x, position.y, position.z );
+      cylinder.position.set(position.x, position.y, position.z);
       cylinder.lookAt(new THREE.Vector3(0, 0, 0));
       scene.add(cylinder);
     }
 
-    function getCol(matrix, col){
-       var column = [];
-       for(var i=0; i<matrix.length; i++){
-          column.push(matrix[i][col]);
-       }
-       return column;
+    function getCol(matrix, col) {
+      var column = [];
+      for (var i = 0; i < matrix.length; i++) {
+        column.push(matrix[i][col]);
+      }
+      return column;
     }
 
     function getMaxFakenewsIndex(v, f) {
       var max = -1;
       var r = [-1];
-      for(var i = 1; i < v.length - 1 ; i++) {
-        if(typeof v[i] === "number") {
+      for (var i = 1; i < v.length - 1; i++) {
+        if (typeof v[i] === "number") {
           r.push(f[i] / v[i]);
-          max = r[i-1] > r[i] ? r[i-1] : r[i];
+          max = r[i - 1] > r[i] ? r[i - 1] : r[i];
         }
       }
       return max;
+    }
+
+    function createText(fontname, text, position) {
+
+      var textgeo = new THREE.TextGeometry(text, {
+        font: font,
+        size: 10,
+        height: 1,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.1,
+        bevelSize: 0.1,
+        bevelOffset: 0,
+        bevelSegments: 5
+      });
+      textgeo.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI));
+      // textgeo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI*3/2));
+      var textmat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
+      var text = new THREE.Mesh(textgeo, textmat);
+      var box = new THREE.Box3().setFromObject( text );
+      var size = new THREE.Vector3();
+      box.getSize(size);
+      textgeo.applyMatrix4(new THREE.Matrix4().makeTranslation(size.x/2, 0, 0));
+      text.position.set(position.x, position.y, position.z);
+      text.lookAt(new THREE.Vector3(0, 0, 0));
+      scene.add(text);
     }
 
     // simple function that converts the density data to the markers on screen
@@ -263,7 +340,7 @@
       vcpy.pop();
       var vcpy2 = vcpy.map(x => parseFloat(x.replace(',', '.')));
       var vmax = Math.max(...vcpy2);
-      console.log("vmax : "+vmax);
+      console.log("vmax : " + vmax);
 
       // get max fakenews index
       var fcpy = getCol(data, 4).slice();
@@ -271,13 +348,13 @@
       fcpy.pop();
       var fcpy2 = fcpy.map(x => parseFloat(x.replace(',', '.')));
       var fmax = getMaxFakenewsIndex(vcpy2, fcpy2);
-      console.log("fmax : "+fmax);
+      console.log("fmax : " + fmax);
 
-      for (var i = 1; i < data.length - 1; i++) {
+      for (var i = 0; i < data.length - 1; i++) {
 
         var padding = 5;
-        var glass = new THREE.MeshLambertMaterial({ color: 0xffffff, opacity: 0.1, emissive: 0xffffff, transparent: true });
-        var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.6, emissive: 0x363636 });
+        var glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
+        var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
 
         // syringe body
         // get the data
@@ -288,20 +365,19 @@
         var size = 10 + 500 / vmax * nbvaccinated;
         var findex = parseFloat(data[i][4].replace(',', '.')) / nbvaccinated / fmax;
         // color
-        var syrbodyMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.6, emissive: 0x000000 });
-        var syrbodyColor = new THREE.Color("#90E0EF"); // blue
-        syrbodyColor.lerp(new THREE.Color("#EE2E31"), findex);
-        syrbodyMat.color.set(syrbodyColor);
+        var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
+        var liquidColor = new THREE.Color("#007AA0"); // blue
+        liquidColor.lerp(new THREE.Color("#EE2E31"), findex);
+        liquidMat.color.set(liquidColor);
         // radius
         var radius = 10;
         // calculate the position where we need to start the body of the syringe
         var position = latLongToVector3(y, x, PLANETRADIUS + needlesize + padding, 2);
-
-        createCustomCylinder(size, radius, syrbodyMat, position);
+        createCustomCylinder(size, radius, liquidMat, position);
 
         // glass container
-        var containersize = size+padding+20;
-        var containeradius = radius+padding;
+        var containersize = size + padding + 20;
+        var containeradius = radius + padding;
         var containerposition = latLongToVector3(y, x, PLANETRADIUS + needlesize, 2);
         createCustomCylinder(containersize, containeradius, glass, containerposition);
 
@@ -322,6 +398,11 @@
         var needleradius = 2;
         var needleposition = latLongToVector3(y, x, PLANETRADIUS, 2);
         createCustomCylinder(needlesize, needleradius, metal, needleposition);
+
+        // country name
+        // var textposition = latLongToVector3(y, x+5, PLANETRADIUS + size/2, 2);
+        var textposition = latLongToVector3(y-5, x, PLANETRADIUS, 2);
+        createText('PlayfairDisplay', data[i][0], textposition);
 
         // var needlegeo = new THREE.CylinderGeometry(needleradius, needleradius, needlesize, 10, 1);
         // needlegeo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, needlesize/2, 0 ) );
@@ -375,12 +456,12 @@
 
     // render
     function render() {
-      var timer = Date.now() * 0.0001;
-      camera.position.x = (Math.cos(timer) * 1800);
-      camera.position.z = (Math.sin(timer) * 1800);
+      // var timer = Date.now() * 0.0001;
+      // camera.position.x = (Math.cos(timer) * 1800);
+      // camera.position.z = (Math.sin(timer) * 1800);
       camera.lookAt(scene.position);
       // light.position = camera.position;
-      light.lookAt(scene.position);
+      // light.lookAt(scene.position);
       renderer.render(scene, camera);
       requestAnimationFrame(render);
     }
