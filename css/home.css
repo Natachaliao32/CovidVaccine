@@ -1,0 +1,274 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100&display=swap');
+
+:root {
+  --turquoise: #57BACF;
+  --turquoise-fonce: #007AA0;
+  --bleu-clair: #90E0EF;
+  --vert: #BDF4C3;
+  --rouge: #EE2E31;
+  --vert-fonce: #6dca78;
+  --rouge-fonce: #c9272a;
+}
+
+body {
+  background: linear-gradient(#9EE8FF, var(--vert));
+  background-repeat: no-repeat;
+  background-attachment: fixed; /* no need to set height for the background to take all space */
+  margin: 0 5em;
+  font-family: Libre Franklin, Verdana, Geneva, Tahoma, sans-serif;
+}
+
+/* TITLE STYLING */
+
+.title > h1 {
+  font-family: Playfair Display;
+  color: var(--turquoise);
+  font-size: 75px;
+  text-align: center;
+  margin: 0;
+}
+
+.title {
+  width: 55em;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  /* background-color: rgb(133, 97, 51); */
+}
+
+.slide {
+  margin: 10em 0;
+  height: 100vh;
+  /* background-color: rgb(133, 97, 51); */
+  align-items: center;
+}
+
+/* SLIDE 1 */
+
+#slide1 {
+  display: flex;
+  justify-content: space-evenly;
+  flex-direction: row;
+}
+
+#slide1 > * {
+  margin: 2em;
+}
+
+.section_title {
+  font-family: Playfair Display;
+  font-size: 45px;
+  text-align: center;
+  margin: 0;
+}
+
+#slide1 > .section_title {
+  color: var(--turquoise);
+}
+
+.schema {
+  width: 30em;
+  min-width: 30em;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: var(--turquoise-fonce);
+}
+
+/* ARROW EXPLANATION */
+
+.line_h, .line_v, .circle {
+  background-color: var(--turquoise-fonce);
+}
+
+.line_h {
+  height: 0.1em;
+}
+
+.line_v {
+  width: 0.1em;
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+.arrow_expl_h {
+  position: absolute;
+  top: 14em;
+  left: 50%;
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.arrow_expl_h > .line_h {
+  width: 4em;
+}
+
+.arrow_expl_h > .circle {
+  width: 0.4em;
+  height: 0.4em;
+}
+
+.line_expl_v {
+  position: absolute;
+  left: calc(50% - 7em);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.line_expl_v > .line_v {
+  height: 100%;
+}
+
+.line_expl_v > .line_h {
+  width: 2em;
+}
+
+/* VARIABLE STYLING*/
+
+.var {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  width: 10em;
+  margin: auto 0;
+}
+
+.varname {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.expl {
+  font-size: 16px;
+}
+
+#var_color {
+  top: 1em;
+}
+
+#syringe_gradient {
+  height: 30em;
+  width: auto;
+}
+
+
+
+
+/* SLIDE 2 */
+
+#slide2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+
+}
+
+.pict_expls {
+  display: flex;
+  flex-direction: row;
+}
+
+.answer {
+  text-align: center;
+  margin-bottom: 2em;
+}
+
+#yes_side > .answer {
+  color: var(--vert-fonce);
+}
+
+#no_side > .answer {
+  color: var(--rouge-fonce);
+}
+
+.pict_expl {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.pict_expl img {
+  width: fit-content;
+  margin: 1em 0;
+}
+
+.relation {
+  padding: 0.2em 0.4em;
+  border-radius: 10%;
+  color: white;
+}
+
+#yes_side .relation{
+  background-color: var(--vert-fonce);
+}
+
+#no_side .relation {
+  background-color: var(--rouge);
+}
+
+#yes_side {
+  /* background-color: var(--vert-fonce); */
+  border: solid 0.2em var(--vert-fonce);
+}
+
+#no_side {
+  /* background-color: var(--rouge-fonce); */
+  border: solid 0.2em var(--rouge);
+}
+
+.answer_precision {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.side {
+  padding: 0.5em;
+  width: 30em;
+  border-radius: 5%;
+}
+
+.obs_csq {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.obs_csq > * {
+  margin: 0.5em;
+}
+
+.obs_csq img {
+  width: 0.8em;
+  height: auto;
+}
+
+.next {
+  background-color: var(--turquoise);
+  padding: 1em;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
+}
+
+.next:hover {
+  background-color: var(--turquoise-fonce);
+}
+
+.footer {
+  margin: 10em auto;
+  display: flex;
+  justify-content: center;
+}

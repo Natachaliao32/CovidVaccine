@@ -1,0 +1,359 @@
+<html>
+
+<head>
+  <title>Do fakenews impact vaccination rates?</title>
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+  <div id="globe"></div>
+  <div class="title">
+    <h1>Do fakenews impact</h1>
+    <h1>vaccination</h1>
+    <h1>rates?</h1>
+  </div>
+
+  <div id="sliderPart">
+    <img src="images/slider.png" />
+  </div>
+
+  <div id="legend">
+    <div id="vaccination">
+      <img src ="images/vaccination.png" />
+    </div>
+
+    <div id="coeff">
+      <img src="images/effect.png" />
+    </div>
+
+  <script src="js/three.js"></script>
+  <script language="JavaScript" type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+
+  <script type="module">
+    // import * as THREE from './node_modules/three/src/Three.js';
+    // import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+    import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+
+    // couple of constants
+    var POS_X = 1800;
+    var POS_Y = 500;
+    var POS_Z = 800;
+    // var WIDTH = 1000;
+    // var HEIGHT = 600;
+    var PLANETRADIUS = 400;
+    var WIDTH = window.innerWidth;
+    var HEIGHT = window.innerHeight;
+
+    var FOV = 45;
+    var NEAR = 1;
+    var FAR = 4000;
+
+    // some global variables and initialization code
+    // simple basic renderer
+    var renderer = new THREE.WebGLRenderer({ alpha: true });
+    renderer.setSize(WIDTH, HEIGHT);
+    renderer.setClearColor(0x000000, 0);
+
+    // add it to the target element
+    var mapDiv = document.getElementById("globe");
+    mapDiv.appendChild(renderer.domElement);
+
+    // setup a camera that points to the center
+    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
+
+    var controls = new OrbitControls( camera, renderer.domElement );
+    controls.minDistance = 800;
+    controls.maxDistance = 3000;
+
+    camera.position.set(POS_X, POS_Y, POS_Z);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+    controls.update();
+
+    // create a basic scene and add the camera
+    var scene = new THREE.Scene();
+    scene.add(camera);
+
+    var manager = new THREE.LoadingManager();
+
+    // load font
+    var loader = new THREE.FontLoader(manager);
+    var font = null;
+    loader.load('fonts/' + 'PlayfairDisplay' + '.json', function (response) {
+      console.log("font loaded");
+      font = response;
+    });
+
+    // we wait until the document is loaded before loading the
+    // density data.
+    $(document).ready(function () {
+      jQuery.get('data.csv', function (data) {
+        manager.onLoad = function () { // when all resources are loaded
+          addDensity(CSVToArray(data));
+        }
+        addLights();
+        addEarth();
+        render();
+      });
+    });
+
+    // add the earth
+    function addEarth() {
+      var spGeo = new THREE.SphereGeometry(PLANETRADIUS, 50, 50);
+      var planetTexture = new THREE.TextureLoader().load("textures/earthmap.png")//THREE.ImageUtils.loadTexture("textures/2_no_clouds_4K.jpg");
+      var mat2 = new THREE.MeshPhongMaterial({
+        map: planetTexture,
+        shininess: 0.2
+      });
+      var sp = new THREE.Mesh(spGeo, mat2);
+      scene.add(sp);
+    }
+
+    // add a simple light
+    function addLights() {
+      //Ambiante
+      var light = new THREE.AmbientLight(0x999999);
+      scene.add(light);
+
+      light = new THREE.DirectionalLight(0xffffff, 0.3);
+      light.position.set(POS_X, POS_Y, POS_Z);
+      scene.add(light);
+    }
+
+    // convert CVS file to array
+    function CSVToArray(strData, strDelimiter) {
+      // Check to see if the delimiter is defined. If not,
+      // then default to comma.
+      strDelimiter = (strDelimiter || ",");
+
+      // Create a regular expression to parse the CSV values.
+      var objPattern = new RegExp(
+        (
+          // Delimiters.
+          "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+
+          // Quoted fields.
+          "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+
+          // Standard fields.
+          "([^\"\\" + strDelimiter + "\\r\\n]*))"
+        ),
+        "gi"
+      );
+
+
+      // Create an array to hold our data. Give the array
+      // a default empty first row.
+      var arrData = [[]];
+
+      // Create an array to hold our individual pattern
+      // matching groups.
+      var arrMatches = null;
+
+
+      // Keep looping over the regular expression matches
+      // until we can no longer find a match.
+      while (arrMatches = objPattern.exec(strData)) {
+
+        // Get the delimiter that was found.
+        var strMatchedDelimiter = arrMatches[1];
+
+        // Check to see if the given delimiter has a length
+        // (is not the start of string) and if it matches
+        // field delimiter. If id does not, then we know
+        // that this delimiter is a row delimiter.
+        if (
+          strMatchedDelimiter.length &&
+          strMatchedDelimiter !== strDelimiter
+        ) {
+
+          // Since we have reached a new row of data,
+          // add an empty row to our data array.
+          arrData.push([]);
+
+        }
+
+        var strMatchedValue;
+
+        // Now that we have our delimiter out of the way,
+        // let's check to see which kind of value we
+        // captured (quoted or unquoted).
+        if (arrMatches[2]) {
+
+          // We found a quoted value. When we capture
+          // this value, unescape any double quotes.
+          strMatchedValue = arrMatches[2].replace(
+            new RegExp("\"\"", "g"),
+            "\""
+          );
+
+        } else {
+
+          // We found a non-quoted value.
+          strMatchedValue = arrMatches[3];
+
+        }
+
+
+        // Now that we have our value string, let's add
+        // it to the data array.
+        arrData[arrData.length - 1].push(strMatchedValue);
+      }
+
+      // Return the parsed data.
+      return (arrData);
+    }
+
+    // convert the positions from a lat, lon to a position on a sphere.
+    function latLongToVector3(lat, lon, radius, heigth) {
+      var phi = (lat) * Math.PI / 180;
+      var theta = (lon - 180) * Math.PI / 180;
+
+      var x = -(radius + heigth) * Math.cos(phi) * Math.cos(theta);
+      var y = (radius + heigth) * Math.sin(phi);
+      var z = (radius + heigth) * Math.cos(phi) * Math.sin(theta);
+
+      return new THREE.Vector3(x, y, z);
+    }
+
+    function createCustomCylinder(size, radius, mat, position) {
+      var geo = new THREE.CylinderGeometry(radius, radius, size, 10, 1);
+      geo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -size / 2, 0));
+      geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+      var cylinder = new THREE.Mesh(geo, mat);
+      cylinder.position.set(position.x, position.y, position.z);
+      cylinder.lookAt(new THREE.Vector3(0, 0, 0));
+      scene.add(cylinder);
+    }
+
+    function getCol(matrix, col) {
+      var column = [];
+      for (var i = 0; i < matrix.length; i++) {
+        column.push(matrix[i][col]);
+      }
+      return column;
+    }
+
+    function fakenewsIndex(nbfakenews, percvaccinated) {
+      return Math.log(nbfakenews / percvaccinated);
+    }
+
+    function getNumericArray(array) {
+      // remove headers
+      array.shift();
+      array.pop();
+      return array.map(x => parseFloat(x.replace(',', '.')));
+    }
+
+    function createText(fontname, text, position) {
+
+      var textgeo = new THREE.TextGeometry(text, {
+        font: font,
+        size: 5,
+        height: 1,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.1,
+        bevelSize: 0.1,
+        bevelOffset: 0,
+        bevelSegments: 5
+      });
+      textgeo.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI));
+      // textgeo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI*3/2));
+      var textmat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
+      var text = new THREE.Mesh(textgeo, textmat);
+      var box = new THREE.Box3().setFromObject( text );
+      var size = new THREE.Vector3();
+      box.getSize(size);
+      textgeo.applyMatrix4(new THREE.Matrix4().makeTranslation(size.x/2, 0, 0));
+      text.position.set(position.x, position.y, position.z);
+      text.lookAt(new THREE.Vector3(0, 0, 0));
+      scene.add(text);
+    }
+
+    // simple function that converts the density data to the markers on screen
+    // takes into account one line of category titles
+    function addDensity(data) {
+
+      // get max size
+      var vaccinatedarray = getNumericArray(getCol(data, 3).slice());
+      var populationarray = getNumericArray(getCol(data, 5).slice());
+      var fakenewsarray = getNumericArray(getCol(data, 4).slice());
+
+      var percvaccinatedarray = vaccinatedarray.map((nbvaccinated, index) => nbvaccinated / populationarray[index]);
+      var percvmax = Math.max(...percvaccinatedarray);
+      console.log("percentage vaccinated max : " + percvmax);
+
+      // get max fakenews index
+      var findexarray = fakenewsarray.map((nbfakenews, index) => fakenewsIndex(nbfakenews, percvaccinatedarray[index]));
+      var findexmax = Math.max(...findexarray);
+
+      for (var i = 1; i < data.length - 1; i++) {
+
+        var padding = 2;
+        var glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
+        var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
+
+        // syringe body
+        // get the data
+        var x = parseInt(data[i][1]); // longitude
+        var y = parseInt(data[i][0]); // latitude
+        var nbvaccinated = parseFloat(data[i][3].replace(',', '.'));
+        var percvaccinated = nbvaccinated / parseFloat(data[i][5].replace(',', '.'));
+        // syringe body size goes from 10 to 510
+        var size = 10 + 500 / percvmax * percvaccinated;
+        var findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
+        // color
+        var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
+        var liquidColor = new THREE.Color("#007AA0"); // blue
+        liquidColor.lerp(new THREE.Color("#EE2E31"), findex);
+        liquidMat.color.set(liquidColor);
+        // radius
+        var radius = 5;
+        // calculate the position where we need to start the body of the syringe
+        var position = latLongToVector3(y, x, PLANETRADIUS + needlesize + padding, 2);
+        createCustomCylinder(size, radius, liquidMat, position);
+
+        // glass container
+        var containersize = size + padding + 20;
+        var containeradius = radius + padding;
+        var containerposition = latLongToVector3(y, x, PLANETRADIUS + needlesize, 2);
+        createCustomCylinder(containersize, containeradius, glass, containerposition);
+
+        // glass plunger (tube)
+        var plungertsize = 5;
+        var plungertradius = radius-2;
+        var plungertposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize, 2);
+        createCustomCylinder(plungertsize, plungertradius, glass, plungertposition);
+
+        // glass plunger (extremity)
+        var plungeresize = 5;
+        var plungereradius = containeradius;
+        var plungereposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize + plungertsize, 2);
+        createCustomCylinder(plungeresize, plungereradius, glass, plungereposition);
+
+        // needle
+        var needlesize = 10;
+        var needleradius = 1;
+        var needleposition = latLongToVector3(y, x, PLANETRADIUS, 2);
+        createCustomCylinder(needlesize, needleradius, metal, needleposition);
+
+        // country name
+        var textposition = latLongToVector3(y-2, x, PLANETRADIUS, 2);
+        createText('PlayfairDisplay', data[i][2], textposition);
+      }
+    }
+
+    // render
+    function render() {
+      camera.lookAt(scene.position);
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
+  
+  </script>
+
+</body>
+
+</html>
