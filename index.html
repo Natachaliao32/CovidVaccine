@@ -277,7 +277,7 @@
     }
 
     function fakenewsIndex(nbfakenews, percvaccinated) {
-      return (nbfakenews / percvaccinated);
+      return Math.log(nbfakenews / percvaccinated);
     }
 
     function getNumericArray(array) {
