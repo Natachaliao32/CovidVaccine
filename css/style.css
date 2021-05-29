@@ -27,16 +27,18 @@
 
     #globe {
       position: absolute;
-      /* top: 0.5vh;
-      left: 0.5vw; */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       z-index: 99;
-      margin-right : 100px;
     }
 
     .title {
       position: absolute;
       top: 2em;
-      left: 3em;
+      left: 3em;      
+      top: 20px;
+      left: 25px;
     }
 
     .title>h1 {
@@ -46,7 +48,7 @@
     }
 
     #sliderPart {
-        width : 850px;
+        /* width : 850px;
         height : 650px;
         margin-left : 400px;
         align-self: center;
@@ -55,16 +57,23 @@
         justify-content: center;
         flex-wrap : nowrap;
         margin-left : 200px;
-        font-size : 12px;
+        font-size : 12px; */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(calc(-50% - 30px), -50%);  
     }
 
     #legend {
         width : 300px;
-        align-self: flex-end;
+        /* align-self: flex-end;
         display: flex;
         flex-direction : column;
         justify-content : flex-end;
-        margin-bottom : 10px;
+        margin-bottom : 10px; */
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
     }
 
     #coeff{
