@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100&display=swap');
+
+    :root {
+      --turquoise: #57BACF;
+      --turquoise-fonce: #007AA0;
+      --bleu-clair: #90E0EF;
+      --vert: #BDF4C3;
+      --rouge: #EE2E31;
+
+    }
+
+    body {
+      margin: 0;
+      background: linear-gradient(#9EE8FF, var(--vert));
+      display : flex;
+      flex-direction : row;
+      justify-content : space-around;
+      flex-wrap : nowrap;
+      overflow : hidden;
+    }
+
+    canvas {
+      /* margin: 0 auto; */
+      z-index: 99;
+    }
+
+    #globe {
+      position: absolute;
+      /* top: 0.5vh;
+      left: 0.5vw; */
+      z-index: 99;
+    }
+
+    .title {
+      position: absolute;
+      top: 2em;
+      left: 3em;
+    }
+
+    .title>h1 {
+      font-family: Playfair Display;
+      color: var(--turquoise);
+      margin: 0;
+    }
+
+    #sliderPart {
+        width : 850px;
+        height : 650px;
+        align-self: center;
+        display : flex;
+        flex-direction : inherit;
+        justify-content: center;
+        flex-wrap : nowrap;
+        margin-left : 200px;
+        font-size : 12px;
+    }
+
+    #legend {
+        width : 300px;
+        align-self: flex-end;
+        display: flex;
+        flex-direction : column;
+        justify-content : flex-end;
+        margin-bottom : 10px;
+    }
+
+    #coeff{
+        width : auto;
+        height : auto;
+        display : flex;
+        flex-direction : column;
+        justify-content : flex-end;
+    }
+
+    #vaccination {
+        justify-content : flex-end;
+        margin-top : 20px;
+        margin-bottom : 20px;
+        margin-left : 135px;
+    }
