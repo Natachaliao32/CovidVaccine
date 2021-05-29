@@ -277,19 +277,7 @@
     }
 
     function fakenewsIndex(nbfakenews, percvaccinated) {
-      return nbfakenews / percvaccinated;
-    }
-
-    function getMaxFakenewsIndex(v, f, pop) {
-      var max = -1;
-      var r = [-1];
-      for (var i = 1; i < v.length - 1; i++) {
-        if (typeof v[i] === "number" && typeof f[i] === "number" && typeof pop[i] === "number") {
-          r.push(fakenewsIndex(f[i], v[i] / pop[i]));
-          max = r[i - 1] > r[i] ? r[i - 1] : r[i];
-        }
-      }
-      return max;
+      return (nbfakenews / percvaccinated);
     }
 
     function getNumericArray(array) {
@@ -343,7 +331,7 @@
       console.log("percentage vaccinated max : " + percvmax);
 
       // get max fakenews index
-      var findexarray = fakenewsarray.map((nbfakenews, index) => nbfakenews / percvaccinatedarray[index]);
+      var findexarray = fakenewsarray.map((nbfakenews, index) => fakenewsIndex(nbfakenews, percvaccinatedarray[index]));
       var findexmax = Math.max(...findexarray);
       console.log("findex max : " + findexmax);
 
@@ -362,7 +350,7 @@
         // syringe body size goes from 10 to 510
         var size = 10 + 500 / percvmax * percvaccinated;
         var findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
-        console.log(findex);
+        console.log(data[i][2] + " " + findex*findexmax);
         // color
         var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
         var liquidColor = new THREE.Color("#007AA0"); // blue
