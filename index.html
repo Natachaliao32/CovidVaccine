@@ -20,14 +20,11 @@
     }
 
     canvas {
-      /* margin: 0 auto; */
       z-index: 99;
     }
 
     #globe {
       position: absolute;
-      /* top: 0.5vh;
-      left: 0.5vw; */
       z-index: 99;
     }
 
@@ -62,7 +59,6 @@
     // import * as THREE from './node_modules/three/src/Three.js';
     // import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
     import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
-    import { BufferGeometryUtils } from "https://threejs.org/examples/jsm/utils/BufferGeometryUtils.js";
 
     // couple of constants
     var POS_X = 1800;
@@ -90,7 +86,6 @@
 
     // setup a camera that points to the center
     var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
-    // var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
 
     var controls = new OrbitControls( camera, renderer.domElement );
     controls.minDistance = 800;
@@ -314,12 +309,8 @@
     }
 
     // simple function that converts the density data to the markers on screen
-    // the height of each marker is relative to the density.
     // takes into account one line of category titles
     function addDensity(data) {
-
-      // the geometry that will contain all our cubes
-      var geom = [] //new THREE.BufferGeometry(); //THREE.Geometry();
 
       // get max size
       var vaccinatedarray = getNumericArray(getCol(data, 3).slice());
@@ -333,7 +324,6 @@
       // get max fakenews index
       var findexarray = fakenewsarray.map((nbfakenews, index) => fakenewsIndex(nbfakenews, percvaccinatedarray[index]));
       var findexmax = Math.max(...findexarray);
-      console.log("findex max : " + findexmax);
 
       for (var i = 1; i < data.length - 1; i++) {
 
@@ -350,7 +340,6 @@
         // syringe body size goes from 10 to 510
         var size = 10 + 500 / percvmax * percvaccinated;
         var findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
-        console.log(data[i][2] + " " + findex*findexmax);
         // color
         var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
         var liquidColor = new THREE.Color("#007AA0"); // blue
@@ -387,82 +376,18 @@
         createCustomCylinder(needlesize, needleradius, metal, needleposition);
 
         // country name
-        // var textposition = latLongToVector3(y, x+5, PLANETRADIUS + size/2, 2);
         var textposition = latLongToVector3(y-2, x, PLANETRADIUS, 2);
         createText('PlayfairDisplay', data[i][2], textposition);
-
-        // liquid.updateMatrix();
-        // geom.push(liquid.geometry);
-        // container.updateMatrix();
-        // geom.push(container.geometry);
-        // plungert.updateMatrix();
-        // geom.push(plungert.geometry);
-        // plungere.updateMatrix();
-        // geom.push(plungere.geometry);
-        // needle.updateMatrix();
-        // geom.push(needle.geometry);
-
-        // var needlegeo = new THREE.CylinderGeometry(needleradius, needleradius, needlesize, 10, 1);
-        // needlegeo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, needlesize/2, 0 ) );
-        // needlegeo.applyMatrix4( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-        // var needle = new THREE.Mesh(needlegeo, needlemat);
-        // needle.position.set( position.x, position.y, position.z ); // position;
-        // needle.lookAt(new THREE.Vector3(0, 0, 0));
-        // scene.add(needle);
-
-        // create the cube
-        // var cube = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 1 + size / 8, 1, 1, 1, cubeMat)); // CubeGeometry deprecated
-        // var cubegeo = new THREE.BoxGeometry( 10, 10, 1 + size / 8, 1, 1, 1 );
-        // var cubegeo = new THREE.CylinderGeometry( radius, radius, size, 10, 1 );
-        // cubegeo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, 1-size/2, 0 ) );
-        // cubegeo.applyMatrix4( new THREE.Matrix4().makeRotationX( Math.PI / 2 ) );
-        // var cube = new THREE.Mesh( cubegeo, cubeMat );
-
-        // position the cube correctly
-        // cube.position.set( position.x, position.y, position.z ); // position;
-
-        // cube.lookAt(new THREE.Vector3(0, 0, 0));
-
-        // console.log(size+" / "+radius+" / "+position.x+" / "+position.y+" / "+position.z);
-
-
-        // merge
-        // var singleGeometry = new THREE.BufferGeometry();
-        // cube.updateMatrix();
-        // singleGeometry.merge(cube.geometry, cube.matrix);
-        // needle.updateMatrix();
-        // singleGeometry.merge(needle.geometry, needle.matrix);
-        // var syringe = new THREE.Mesh(singleGeometry, cubeMat); // new THREE.MeshFaceMaterial() removed, use array instead
-        // scene.add(syringe);
-
-        // merge with main model
-        // THREE.GeometryUtils.merge(geom, cube); deprecated
-        // cube.updateMatrix();
-
-        // console.log(cube.geometry);
-        // geom.merge(cube.geometry, cube.matrix);
-        // geom.merge(cube.geometry);
-        // scene.add(cube)
       }
-      // var singlegeo = BufferGeometryUtils.mergeBufferGeometries(geom, true);
-      // // create a new mesh, containing all the other meshes.
-      // var total = new THREE.Mesh(singlegeo, new THREE.MeshLambertMaterial({ color: 0xff000 })); // new THREE.MeshFaceMaterial() removed, use array instead
-      // // and add the total mesh to the scene
-      // scene.add(total);
     }
 
     // render
     function render() {
-      // var timer = Date.now() * 0.0001;
-      // camera.position.x = (Math.cos(timer) * 1800);
-      // camera.position.z = (Math.sin(timer) * 1800);
       camera.lookAt(scene.position);
-      // light.position = camera.position;
-      // light.lookAt(scene.position);
       renderer.render(scene, camera);
       requestAnimationFrame(render);
     }
-
+  
   </script>
 
 </body>
