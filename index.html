@@ -276,16 +276,27 @@
       return column;
     }
 
-    function getMaxFakenewsIndex(v, f) {
+    function fakenewsIndex(nbfakenews, percvaccinated) {
+      return nbfakenews / percvaccinated;
+    }
+
+    function getMaxFakenewsIndex(v, f, pop) {
       var max = -1;
       var r = [-1];
       for (var i = 1; i < v.length - 1; i++) {
-        if (typeof v[i] === "number") {
-          r.push(f[i] / v[i]);
+        if (typeof v[i] === "number" && typeof f[i] === "number" && typeof pop[i] === "number") {
+          r.push(fakenewsIndex(f[i], v[i] / pop[i]));
           max = r[i - 1] > r[i] ? r[i - 1] : r[i];
         }
       }
       return max;
+    }
+
+    function getNumericArray(array) {
+      // remove headers
+      array.shift();
+      array.pop();
+      return array.map(x => parseFloat(x.replace(',', '.')));
     }
 
     function createText(fontname, text, position) {
@@ -323,20 +334,18 @@
       var geom = [] //new THREE.BufferGeometry(); //THREE.Geometry();
 
       // get max size
-      var vcpy = getCol(data, 3).slice();
-      vcpy.shift();
-      vcpy.pop();
-      var vcpy2 = vcpy.map(x => parseFloat(x.replace(',', '.')));
-      var vmax = Math.max(...vcpy2);
-      console.log("vmax : " + vmax);
+      var vaccinatedarray = getNumericArray(getCol(data, 3).slice());
+      var populationarray = getNumericArray(getCol(data, 5).slice());
+      var fakenewsarray = getNumericArray(getCol(data, 4).slice());
+
+      var percvaccinatedarray = vaccinatedarray.map((nbvaccinated, index) => nbvaccinated / populationarray[index]);
+      var percvmax = Math.max(...percvaccinatedarray);
+      console.log("percentage vaccinated max : " + percvmax);
 
       // get max fakenews index
-      var fcpy = getCol(data, 4).slice();
-      fcpy.shift();
-      fcpy.pop();
-      var fcpy2 = fcpy.map(x => parseFloat(x.replace(',', '.')));
-      var fmax = getMaxFakenewsIndex(vcpy2, fcpy2);
-      console.log("fmax : " + fmax);
+      var findexarray = fakenewsarray.map((nbfakenews, index) => nbfakenews / percvaccinatedarray[index]);
+      var findexmax = Math.max(...findexarray);
+      console.log("findex max : " + findexmax);
 
       for (var i = 1; i < data.length - 1; i++) {
 
@@ -349,9 +358,11 @@
         var x = parseInt(data[i][1]); // longitude
         var y = parseInt(data[i][0]); // latitude
         var nbvaccinated = parseFloat(data[i][3].replace(',', '.'));
+        var percvaccinated = nbvaccinated / parseFloat(data[i][5].replace(',', '.'));
         // syringe body size goes from 10 to 510
-        var size = 10 + 500 / vmax * nbvaccinated;
-        var findex = parseFloat(data[i][4].replace(',', '.')) / nbvaccinated / fmax;
+        var size = 10 + 500 / percvmax * percvaccinated;
+        var findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
+        console.log(findex);
         // color
         var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
         var liquidColor = new THREE.Color("#007AA0"); // blue
