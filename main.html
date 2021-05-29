@@ -28,11 +28,11 @@
       <img src="images/effect.png" />
     </div>
   </div>
-  
+
   <div id="loading_message">
     Loading...
   </div>
-    
+
   <script src="js/three.js"></script>
   <script language="JavaScript" type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
 
@@ -294,12 +294,16 @@
       var findexarray = fakenewsarray.map((nbfakenews, index) => fakenewsIndex(nbfakenews, percvaccinatedarray[index]));
       var findexmax = Math.max(...findexarray);
 
+      var padding = 2;
+      var glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
+      var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
+      var liquidColor = new THREE.Color("#ffffff"); 
+      var blue = new THREE.Color("#007AA0"); 
+      var red = new THREE.Color("#EE2E31"); 
+
       for (var i = 1; i < data.length - 1; i++) {
-
-        var padding = 2;
-        var glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
-        var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
-
+        
+        var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
         // syringe body
         // get the data
         var x = parseInt(data[i][1]); // longitude
@@ -310,9 +314,7 @@
         var size = 10 + 500 / percvmax * percvaccinated;
         var findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
         // color
-        var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
-        var liquidColor = new THREE.Color("#007AA0"); // blue
-        liquidColor.lerp(new THREE.Color("#EE2E31"), findex);
+        liquidColor.lerpColors(blue, red, findex);
         liquidMat.color.set(liquidColor);
         // radius
         var radius = 5;
@@ -356,7 +358,7 @@
       renderer.render(scene, camera);
       requestAnimationFrame(render);
     }
-  
+
   </script>
 
 </body>
