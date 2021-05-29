@@ -83,9 +83,6 @@
     var renderer = new THREE.WebGLRenderer({ alpha: true });
     renderer.setSize(WIDTH, HEIGHT);
     renderer.setClearColor(0x000000, 0);
-    // turn on shadows
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
     // add it to the target element
     var mapDiv = document.getElementById("globe");
@@ -140,9 +137,6 @@
         shininess: 0.2
       });
       var sp = new THREE.Mesh(spGeo, mat2);
-      // receive shadow and does not cast
-      sp.receiveShadow = true; //default
-      sp.castShadow = true;
       scene.add(sp);
     }
 
@@ -166,10 +160,6 @@
       light = new THREE.DirectionalLight(0xffffff, 0.3);
       light.position.set(POS_X, POS_Y, POS_Z);
       scene.add(light);
-
-      //Create a helper for the shadow camera (optional)
-      // const helper = new THREE.CameraHelper( light.shadow.camera );
-      // scene.add( helper );
     }
 
     // convert CVS file to array
