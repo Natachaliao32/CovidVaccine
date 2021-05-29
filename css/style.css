@@ -20,25 +20,18 @@
       overflow : hidden;
     }
 
-    canvas {
-      /* margin: 0 auto; */
-      z-index: 99;
-    }
-
     #globe {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      z-index: 99;
+      z-index: 98;
     }
 
     .title {
       position: absolute;
       top: 2em;
-      left: 3em;      
-      /* top: 20px;
-      left: 25px; */
+      left: 3em;
     }
 
     .title>h1 {
@@ -48,16 +41,6 @@
     }
 
     #sliderPart {
-        /* width : 850px;
-        height : 650px;
-        margin-left : 400px;
-        align-self: center;
-        display : flex;
-        flex-direction : inherit;
-        justify-content: center;
-        flex-wrap : nowrap;
-        margin-left : 200px;
-        font-size : 12px; */
         position: absolute;
         top: 50%;
         left: 50%;
@@ -66,11 +49,6 @@
 
     #legend {
         width : 300px;
-        /* align-self: flex-end;
-        display: flex;
-        flex-direction : column;
-        justify-content : flex-end;
-        margin-bottom : 10px; */
         position: absolute;
         bottom: 20px;
         right: 20px;
@@ -89,4 +67,15 @@
         margin-top : 20px;
         margin-bottom : 20px;
         margin-left : 135px;
+    }
+
+    #loading_message {
+      background-color: white;
+      padding: 1em;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: Libre Franklin, Verdana, Geneva, Tahoma, sans-serif;
+      z-index: 99;
     }

@@ -3,7 +3,7 @@
 <head>
   <title>Do fakenews impact vaccination rates?</title>
   <link rel="stylesheet" href="css/style.css">
-
+  <link rel="icon" type="image/png" href="images/icon.png" />
 </head>
 
 <body>
@@ -27,7 +27,12 @@
     <div id="coeff">
       <img src="images/effect.png" />
     </div>
-
+  </div>
+  
+  <div id="loading_message">
+    Loading...
+  </div>
+    
   <script src="js/three.js"></script>
   <script language="JavaScript" type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
 
@@ -91,6 +96,8 @@
       jQuery.get('data.csv', function (data) {
         manager.onLoad = function () { // when all resources are loaded
           addDensity(CSVToArray(data));
+          var message = document.getElementById("loading_message");
+          message.style.display = "none";
         }
         addLights();
         addEarth();
