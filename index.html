@@ -62,6 +62,7 @@
     // import * as THREE from './node_modules/three/src/Three.js';
     // import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
     import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+    import { BufferGeometryUtils } from "https://threejs.org/examples/jsm/utils/BufferGeometryUtils.js";
 
     // couple of constants
     var POS_X = 1800;
@@ -95,7 +96,7 @@
     // var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 );
 
     var controls = new OrbitControls( camera, renderer.domElement );
-    controls.minDistance = 1200;
+    controls.minDistance = 800;
     controls.maxDistance = 3000;
 
     camera.position.set(POS_X, POS_Y, POS_Z);
@@ -121,7 +122,6 @@
     $(document).ready(function () {
       jQuery.get('data.csv', function (data) {
         manager.onLoad = function () { // when all resources are loaded
-          console.log("ready!");
           addDensity(CSVToArray(data));
         }
         addLights();
@@ -176,7 +176,7 @@
     function CSVToArray(strData, strDelimiter) {
       // Check to see if the delimiter is defined. If not,
       // then default to comma.
-      strDelimiter = (strDelimiter || ";");
+      strDelimiter = (strDelimiter || ",");
 
       // Create a regular expression to parse the CSV values.
       var objPattern = new RegExp(
@@ -273,8 +273,6 @@
       geo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -size / 2, 0));
       geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
       var cylinder = new THREE.Mesh(geo, mat);
-      cylinder.castShadow = true;
-      cylinder.receiveShadow = true; //default
       cylinder.position.set(position.x, position.y, position.z);
       cylinder.lookAt(new THREE.Vector3(0, 0, 0));
       scene.add(cylinder);
@@ -304,7 +302,7 @@
 
       var textgeo = new THREE.TextGeometry(text, {
         font: font,
-        size: 10,
+        size: 5,
         height: 1,
         curveSegments: 12,
         bevelEnabled: true,
@@ -332,7 +330,7 @@
     function addDensity(data) {
 
       // the geometry that will contain all our cubes
-      var geom = new THREE.BufferGeometry(); //THREE.Geometry();
+      var geom = [] //new THREE.BufferGeometry(); //THREE.Geometry();
 
       // get max size
       var vcpy = getCol(data, 3).slice();
@@ -350,16 +348,16 @@
       var fmax = getMaxFakenewsIndex(vcpy2, fcpy2);
       console.log("fmax : " + fmax);
 
-      for (var i = 0; i < data.length - 1; i++) {
+      for (var i = 1; i < data.length - 1; i++) {
 
-        var padding = 5;
+        var padding = 2;
         var glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
         var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
 
         // syringe body
         // get the data
         var x = parseInt(data[i][1]); // longitude
-        var y = parseInt(data[i][2]); // latitude
+        var y = parseInt(data[i][0]); // latitude
         var nbvaccinated = parseFloat(data[i][3].replace(',', '.'));
         // syringe body size goes from 10 to 510
         var size = 10 + 500 / vmax * nbvaccinated;
@@ -370,7 +368,7 @@
         liquidColor.lerp(new THREE.Color("#EE2E31"), findex);
         liquidMat.color.set(liquidColor);
         // radius
-        var radius = 10;
+        var radius = 5;
         // calculate the position where we need to start the body of the syringe
         var position = latLongToVector3(y, x, PLANETRADIUS + needlesize + padding, 2);
         createCustomCylinder(size, radius, liquidMat, position);
@@ -382,8 +380,8 @@
         createCustomCylinder(containersize, containeradius, glass, containerposition);
 
         // glass plunger (tube)
-        var plungertsize = 20;
-        var plungertradius = 10;
+        var plungertsize = 5;
+        var plungertradius = radius-2;
         var plungertposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize, 2);
         createCustomCylinder(plungertsize, plungertradius, glass, plungertposition);
 
@@ -394,15 +392,26 @@
         createCustomCylinder(plungeresize, plungereradius, glass, plungereposition);
 
         // needle
-        var needlesize = 20;
-        var needleradius = 2;
+        var needlesize = 10;
+        var needleradius = 1;
         var needleposition = latLongToVector3(y, x, PLANETRADIUS, 2);
         createCustomCylinder(needlesize, needleradius, metal, needleposition);
 
         // country name
         // var textposition = latLongToVector3(y, x+5, PLANETRADIUS + size/2, 2);
-        var textposition = latLongToVector3(y-5, x, PLANETRADIUS, 2);
-        createText('PlayfairDisplay', data[i][0], textposition);
+        var textposition = latLongToVector3(y-2, x, PLANETRADIUS, 2);
+        createText('PlayfairDisplay', data[i][2], textposition);
+
+        // liquid.updateMatrix();
+        // geom.push(liquid.geometry);
+        // container.updateMatrix();
+        // geom.push(container.geometry);
+        // plungert.updateMatrix();
+        // geom.push(plungert.geometry);
+        // plungere.updateMatrix();
+        // geom.push(plungere.geometry);
+        // needle.updateMatrix();
+        // geom.push(needle.geometry);
 
         // var needlegeo = new THREE.CylinderGeometry(needleradius, needleradius, needlesize, 10, 1);
         // needlegeo.applyMatrix4( new THREE.Matrix4().makeTranslation ( 0, needlesize/2, 0 ) );
@@ -444,13 +453,12 @@
         // console.log(cube.geometry);
         // geom.merge(cube.geometry, cube.matrix);
         // geom.merge(cube.geometry);
-        // THREE.BufferGeometryUtils.mergeBufferGeometries([geom, cube.geometry]);
         // scene.add(cube)
       }
-
-      // create a new mesh, containing all the other meshes.
-      // var total = new THREE.Mesh(geom, new THREE.MeshLambertMaterial({ color: 0xff000 })); // new THREE.MeshFaceMaterial() removed, use array instead
-      // and add the total mesh to the scene
+      // var singlegeo = BufferGeometryUtils.mergeBufferGeometries(geom, true);
+      // // create a new mesh, containing all the other meshes.
+      // var total = new THREE.Mesh(singlegeo, new THREE.MeshLambertMaterial({ color: 0xff000 })); // new THREE.MeshFaceMaterial() removed, use array instead
+      // // and add the total mesh to the scene
       // scene.add(total);
     }
 
