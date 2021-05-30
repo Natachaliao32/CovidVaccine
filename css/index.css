@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100&display=swap');
+
+:root {
+  --turquoise: #57BACF;
+  --turquoise-fonce: #007AA0;
+  --bleu-clair: #90E0EF;
+  --vert: #BDF4C3;
+  --rouge: #EE2E31;
+  --vert-fonce: #6dca78;
+  --rouge-fonce: #c9272a;
+}
+
+body {
+    background: linear-gradient(#9EE8FF, var(--vert));
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* no need to set height for the background to take all space */
+    font-family: Libre Franklin, Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.button {
+    background-color: var(--turquoise);
+    padding: 1em;
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
+  }
+
+.button:hover {
+    background-color: var(--turquoise-fonce);
+}

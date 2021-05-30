@@ -1,18 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@100&display=swap');
-
-    :root {
-      --turquoise: #57BACF;
-      --turquoise-fonce: #007AA0;
-      --bleu-clair: #90E0EF;
-      --vert: #BDF4C3;
-      --rouge: #EE2E31;
-
-    }
-
     body {
       margin: 0;
-      background: linear-gradient(#9EE8FF, var(--vert));
       display : flex;
       flex-direction : row;
       justify-content : space-around;
