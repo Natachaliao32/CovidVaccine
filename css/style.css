@@ -78,4 +78,6 @@
       transform: translate(-50%, -50%);
       font-family: Libre Franklin, Verdana, Geneva, Tahoma, sans-serif;
       z-index: 99;
+      width: 15em;
+      text-align: center;
     }

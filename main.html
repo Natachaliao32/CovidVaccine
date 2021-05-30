@@ -30,7 +30,7 @@
   </div>
 
   <div id="loading_message">
-    Loading...
+    Loading... If longer than 10s, please reload the page.
   </div>
 
   <script src="js/three.js"></script>
@@ -67,7 +67,7 @@
     var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
 
     var controls = new OrbitControls( camera, renderer.domElement );
-    controls.minDistance = 800;
+    controls.minDistance = 500;
     controls.maxDistance = 3000;
 
     camera.position.set(POS_X, POS_Y, POS_Z);
@@ -93,6 +93,7 @@
     $(document).ready(function () {
       jQuery.get('data.csv', function (data) {
         manager.onLoad = function () { // when all resources are loaded
+          console.log("resources loaded");
           addDensity(CSVToArray(data));
           var message = document.getElementById("loading_message");
           message.style.display = "none";
