@@ -53,13 +53,14 @@ body {
 }
 
 .schema {
-  width: 30em;
-  min-width: 30em;
+  width: 38em;
+  min-width: 38em;
   position: relative;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   color: var(--turquoise-fonce);
+  /* background-color: brown; */
 }
 
 /* ARROW EXPLANATION */
@@ -82,8 +83,8 @@ body {
 
 .arrow_expl_h {
   position: absolute;
-  top: 14em;
-  left: 50%;
+  top: 12.8em;
+  left: 40%;
   width: fit-content;
   height: fit-content;
   display: flex;
@@ -92,7 +93,7 @@ body {
 }
 
 .arrow_expl_h > .line_h {
-  width: 4em;
+  width: 8em;
 }
 
 .arrow_expl_h > .circle {
@@ -102,7 +103,7 @@ body {
 
 .line_expl_v {
   position: absolute;
-  left: calc(50% - 5.5em);
+  left: calc(50% - 9em);
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -125,6 +126,11 @@ body {
   flex-direction: column;
   width: 10em;
   margin: auto 0;
+  /* background-color: rgb(212, 153, 153); */
+}
+
+#var_color {
+  width: 18em;
 }
 
 .varname {
@@ -243,3 +249,7 @@ body {
   display: flex;
   justify-content: center;
 }
+/* 
+#var_color img {
+  width: 2em;
+} */
