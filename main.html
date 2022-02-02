@@ -9,7 +9,7 @@
 
 <body>
 
-  <div id="globe"></div>
+  <canvas id="globe"></canvas>
   <div class="title">
     <h1>Do fake news impact</h1>
     <h1>vaccination</h1>
@@ -22,7 +22,7 @@
 
   <div id="legend">
     <div id="vaccination">
-      <img src ="images/vaccination.png" />
+      <img src="images/vaccination.png" />
     </div>
 
     <div id="coeff">
@@ -30,62 +30,56 @@
     </div>
   </div>
 
-  <div id="loading_message">
-    Loading... If longer than 10s, please reload the page.
-  </div>
-  
-  <script src="js/three.js"></script>
+  <div id="loading_message">Loading... Please wait up to 10s.</div>
+
   <script language="JavaScript" type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
 
   <script type="module">
-    import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+    import * as THREE from 'three';
+    import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+    import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+    import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+
 
     // couple of constants
-    var POS_X = 1800;
-    var POS_Y = 500;
-    var POS_Z = 800;
-    // var WIDTH = 1000;
-    // var HEIGHT = 600;
-    var PLANETRADIUS = 400;
-    var WIDTH = window.innerWidth;
-    var HEIGHT = window.innerHeight;
+    const POS_X = 1800;
+    const POS_Y = 500;
+    const POS_Z = 800;
 
-    var FOV = 45;
-    var NEAR = 1;
-    var FAR = 4000;
+    const PLANETRADIUS = 400;
+    const WIDTH = window.innerWidth;
+    const HEIGHT = window.innerHeight;
+
+    const FOV = 45;
+    const NEAR = 1;
+    const FAR = 4000;
 
     // some global variables and initialization code
     // simple basic renderer
-    var renderer = new THREE.WebGLRenderer({ alpha: true });
+    const canvas = document.getElementById("globe");
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
     renderer.setSize(WIDTH, HEIGHT);
-    renderer.setClearColor(0x000000, 0);
+    // renderer.setClearColor(0x000000, 0);
 
-    // add it to the target element
-    var mapDiv = document.getElementById("globe");
-    mapDiv.appendChild(renderer.domElement);
+    // create a basic scene
+    let scene = new THREE.Scene();
 
     // setup a camera that points to the center
-    var camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
+    const camera = new THREE.PerspectiveCamera(FOV, WIDTH / HEIGHT, NEAR, FAR);
 
-    var controls = new OrbitControls( camera, renderer.domElement );
+    camera.position.set(POS_X, POS_Y, POS_Z);
+    camera.lookAt(0, 0, 0);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.minDistance = 500;
     controls.maxDistance = 3000;
 
-    camera.position.set(POS_X, POS_Y, POS_Z);
-    camera.lookAt(new THREE.Vector3(0, 0, 0));
-    controls.update();
-
-    // create a basic scene and add the camera
-    var scene = new THREE.Scene();
-    scene.add(camera);
-
-    var manager = new THREE.LoadingManager();
+    let manager = new THREE.LoadingManager();
 
     // load font
-    var loader = new THREE.FontLoader(manager);
-    var font = null;
+    let loader = new FontLoader(manager);
+    let font = null;
     loader.load('fonts/' + 'PlayfairDisplay' + '.json', function (response) {
-      console.log("font loaded");
       font = response;
     });
 
@@ -96,31 +90,31 @@
         manager.onLoad = function () { // when all resources are loaded
           console.log("resources loaded");
           addDensity(CSVToArray(data));
-          var message = document.getElementById("loading_message");
+          let message = document.getElementById("loading_message");
           message.style.display = "none";
         }
         addLights();
         addEarth();
-        render();
+        animate();
       });
     });
 
     // add the earth
     function addEarth() {
-      var spGeo = new THREE.SphereGeometry(PLANETRADIUS, 50, 50);
-      var planetTexture = new THREE.TextureLoader().load("textures/earthmap.png")//THREE.ImageUtils.loadTexture("textures/2_no_clouds_4K.jpg");
-      var mat2 = new THREE.MeshPhongMaterial({
+      let spGeo = new THREE.SphereGeometry(PLANETRADIUS, 50, 50);
+      let planetTexture = new THREE.TextureLoader().load("textures/earthmap.png");
+      let mat2 = new THREE.MeshPhongMaterial({
         map: planetTexture,
         shininess: 0.2
       });
-      var sp = new THREE.Mesh(spGeo, mat2);
+      let sp = new THREE.Mesh(spGeo, mat2);
       scene.add(sp);
     }
 
     // add a simple light
     function addLights() {
       //Ambiante
-      var light = new THREE.AmbientLight(0x999999);
+      let light = new THREE.AmbientLight(0x999999);
       scene.add(light);
 
       light = new THREE.DirectionalLight(0xffffff, 0.3);
@@ -135,7 +129,7 @@
       strDelimiter = (strDelimiter || ",");
 
       // Create a regular expression to parse the CSV values.
-      var objPattern = new RegExp(
+      let objPattern = new RegExp(
         (
           // Delimiters.
           "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
@@ -152,11 +146,11 @@
 
       // Create an array to hold our data. Give the array
       // a default empty first row.
-      var arrData = [[]];
+      let arrData = [[]];
 
       // Create an array to hold our individual pattern
       // matching groups.
-      var arrMatches = null;
+      let arrMatches = null;
 
 
       // Keep looping over the regular expression matches
@@ -164,7 +158,7 @@
       while (arrMatches = objPattern.exec(strData)) {
 
         // Get the delimiter that was found.
-        var strMatchedDelimiter = arrMatches[1];
+        let strMatchedDelimiter = arrMatches[1];
 
         // Check to see if the given delimiter has a length
         // (is not the start of string) and if it matches
@@ -181,7 +175,7 @@
 
         }
 
-        var strMatchedValue;
+        let strMatchedValue;
 
         // Now that we have our delimiter out of the way,
         // let's check to see which kind of value we
@@ -214,29 +208,19 @@
 
     // convert the positions from a lat, lon to a position on a sphere.
     function latLongToVector3(lat, lon, radius, heigth) {
-      var phi = (lat) * Math.PI / 180;
-      var theta = (lon - 180) * Math.PI / 180;
+      let phi = (lat) * Math.PI / 180;
+      let theta = (lon - 180) * Math.PI / 180;
 
-      var x = -(radius + heigth) * Math.cos(phi) * Math.cos(theta);
-      var y = (radius + heigth) * Math.sin(phi);
-      var z = (radius + heigth) * Math.cos(phi) * Math.sin(theta);
+      let x = -(radius + heigth) * Math.cos(phi) * Math.cos(theta);
+      let y = (radius + heigth) * Math.sin(phi);
+      let z = (radius + heigth) * Math.cos(phi) * Math.sin(theta);
 
       return new THREE.Vector3(x, y, z);
     }
 
-    function createCustomCylinder(size, radius, mat, position) {
-      var geo = new THREE.CylinderGeometry(radius, radius, size, 10, 1);
-      geo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -size / 2, 0));
-      geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-      var cylinder = new THREE.Mesh(geo, mat);
-      cylinder.position.set(position.x, position.y, position.z);
-      cylinder.lookAt(new THREE.Vector3(0, 0, 0));
-      scene.add(cylinder);
-    }
-
     function getCol(matrix, col) {
-      var column = [];
-      for (var i = 0; i < matrix.length; i++) {
+      let column = [];
+      for (let i = 0; i < matrix.length; i++) {
         column.push(matrix[i][col]);
       }
       return column;
@@ -255,7 +239,7 @@
 
     function createText(fontname, text, position) {
 
-      var textgeo = new THREE.TextGeometry(text, {
+      let textgeo = new TextGeometry(text, {
         font: font,
         size: 5,
         height: 1,
@@ -267,16 +251,25 @@
         bevelSegments: 5
       });
       textgeo.applyMatrix4(new THREE.Matrix4().makeRotationY(Math.PI));
-      // textgeo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI*3/2));
-      var textmat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
-      var text = new THREE.Mesh(textgeo, textmat);
-      var box = new THREE.Box3().setFromObject( text );
-      var size = new THREE.Vector3();
+      let textmat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
+      let textMesh = new THREE.Mesh(textgeo, textmat);
+      let box = new THREE.Box3().setFromObject(textMesh);
+      let size = new THREE.Vector3();
       box.getSize(size);
-      textgeo.applyMatrix4(new THREE.Matrix4().makeTranslation(size.x/2, 0, 0));
-      text.position.set(position.x, position.y, position.z);
-      text.lookAt(new THREE.Vector3(0, 0, 0));
-      scene.add(text);
+      textgeo.applyMatrix4(new THREE.Matrix4().makeTranslation(size.x / 2, 0, 0));
+      textMesh.position.set(position.x, position.y, position.z);
+      textMesh.lookAt(0, 0, 0);
+      return textMesh;
+    }
+
+    function createCustomCylinder(size, radius, mat, position) {
+      let geo = new THREE.CylinderGeometry(radius, radius, size, 10, 1);
+      geo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, -size / 2, 0));
+      geo.applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+      let cylinder = new THREE.Mesh(geo, mat);
+      cylinder.position.set(position.x, position.y, position.z);
+      cylinder.lookAt(0, 0, 0);
+      return cylinder
     }
 
     // simple function that converts the density data to the markers on screen
@@ -284,81 +277,104 @@
     function addDensity(data) {
 
       // get max size
-      var vaccinatedarray = getNumericArray(getCol(data, 3).slice());
-      var populationarray = getNumericArray(getCol(data, 5).slice());
-      var fakenewsarray = getNumericArray(getCol(data, 4).slice());
+      let vaccinatedarray = getNumericArray(getCol(data, 3).slice());
+      let populationarray = getNumericArray(getCol(data, 5).slice());
+      let fakenewsarray = getNumericArray(getCol(data, 4).slice());
 
-      var percvaccinatedarray = vaccinatedarray.map((nbvaccinated, index) => nbvaccinated / populationarray[index]);
-      var percvmax = Math.max(...percvaccinatedarray);
+      let percvaccinatedarray = vaccinatedarray.map((nbvaccinated, index) => nbvaccinated / populationarray[index]);
+      let percvmax = Math.max(...percvaccinatedarray);
       console.log("percentage vaccinated max : " + percvmax);
 
       // get max fakenews index
-      var findexarray = fakenewsarray.map((nbfakenews, index) => fakenewsIndex(nbfakenews, percvaccinatedarray[index]));
-      var findexmax = Math.max(...findexarray);
+      let findexarray = fakenewsarray.map((nbfakenews, index) => fakenewsIndex(nbfakenews, percvaccinatedarray[index]));
+      let findexmax = Math.max(...findexarray);
 
-      var padding = 2;
-      var glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
-      var metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
-      var liquidColor = new THREE.Color("#ffffff"); 
-      var blue = new THREE.Color("#007AA0"); 
-      var red = new THREE.Color("#EE2E31"); 
+      let padding = 2;
+      let glass = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.4, emissive: 0xbababa, transparent: true });
+      let metal = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 1, emissive: 0x777777 });
+      let liquidColor = new THREE.Color("#ffffff");
+      let blue = new THREE.Color("#007AA0");
+      let red = new THREE.Color("#EE2E31");
 
-      for (var i = 1; i < data.length - 1; i++) {
-        
-        var liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
-        // syringe body
+      const syringes = new THREE.Group();
+
+      for (let i = 1; i < data.length - 1; i++) {
+
+        const syringe = new THREE.Group();
+
+        let liquidMat = new THREE.MeshLambertMaterial({ color: 0x000000, opacity: 0.8, emissive: 0x000000 });
         // get the data
-        var x = parseInt(data[i][1]); // longitude
-        var y = parseInt(data[i][0]); // latitude
-        var nbvaccinated = parseFloat(data[i][3].replace(',', '.'));
-        var percvaccinated = nbvaccinated / parseFloat(data[i][5].replace(',', '.'));
+        let x = parseInt(data[i][1]); // longitude
+        let y = parseInt(data[i][0]); // latitude
+        let nbvaccinated = parseFloat(data[i][3].replace(',', '.'));
+        let percvaccinated = nbvaccinated / parseFloat(data[i][5].replace(',', '.'));
+        let findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
+
+        // needle
+        let needlesize = 10;
+        let needleradius = 1;
+        let needleposition = latLongToVector3(y, x, PLANETRADIUS, 2);
+        const needle = createCustomCylinder(needlesize, needleradius, metal, needleposition);
+        syringe.add(needle);
+
+        // syringe body
         // syringe body size goes from 10 to 510
-        var size = 10 + 500 / percvmax * percvaccinated;
-        var findex = fakenewsIndex(parseFloat(data[i][4].replace(',', '.')), percvaccinated) / findexmax;
+        let size = 10 + 500 / percvmax * percvaccinated;
         // color
         liquidColor.lerpColors(blue, red, findex);
         liquidMat.color.set(liquidColor);
         // radius
-        var radius = 5;
+        let radius = 5;
         // calculate the position where we need to start the body of the syringe
-        var position = latLongToVector3(y, x, PLANETRADIUS + needlesize + padding, 2);
-        createCustomCylinder(size, radius, liquidMat, position);
+        let position = latLongToVector3(y, x, PLANETRADIUS + needlesize + padding, 2);
+        const syrBody = createCustomCylinder(size, radius, liquidMat, position);
+        syringe.add(syrBody);
 
         // glass container
-        var containersize = size + padding + 20;
-        var containeradius = radius + padding;
-        var containerposition = latLongToVector3(y, x, PLANETRADIUS + needlesize, 2);
-        createCustomCylinder(containersize, containeradius, glass, containerposition);
+        let containersize = size + padding + 20;
+        let containeradius = radius + padding;
+        let containerposition = latLongToVector3(y, x, PLANETRADIUS + needlesize, 2);
+        const container = createCustomCylinder(containersize, containeradius, glass, containerposition);
+        syringe.add(container);
 
         // glass plunger (tube)
-        var plungertsize = 5;
-        var plungertradius = radius-2;
-        var plungertposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize, 2);
-        createCustomCylinder(plungertsize, plungertradius, glass, plungertposition);
+        let plungertsize = 5;
+        let plungertradius = radius - 2;
+        let plungertposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize, 2);
+        const plungert = createCustomCylinder(plungertsize, plungertradius, glass, plungertposition);
+        syringe.add(plungert);
 
         // glass plunger (extremity)
-        var plungeresize = 5;
-        var plungereradius = containeradius;
-        var plungereposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize + plungertsize, 2);
-        createCustomCylinder(plungeresize, plungereradius, glass, plungereposition);
-
-        // needle
-        var needlesize = 10;
-        var needleradius = 1;
-        var needleposition = latLongToVector3(y, x, PLANETRADIUS, 2);
-        createCustomCylinder(needlesize, needleradius, metal, needleposition);
+        let plungeresize = 5;
+        let plungereradius = containeradius;
+        let plungereposition = latLongToVector3(y, x, PLANETRADIUS + needlesize + containersize + plungertsize, 2);
+        const plungere = createCustomCylinder(plungeresize, plungereradius, glass, plungereposition);
+        syringe.add(plungere);
 
         // country name
-        var textposition = latLongToVector3(y-2, x, PLANETRADIUS, 2);
-        createText('PlayfairDisplay', data[i][2], textposition);
+        let textposition = latLongToVector3(y - 2, x, PLANETRADIUS, 2);
+        const text = createText('PlayfairDisplay', data[i][2], textposition);
+        syringe.add(text);
+
+        syringes.add(syringe);
+
+        loading(i/(data.length-1));
       }
+
+      scene.add(syringes)
+    }
+
+    function loading(i) {
+      const message = document.getElementById("loading_message");
+      message.innerText = "Loading : " + i*100 + "%";
+      console.log("Loading : " + i*100 + "%");
     }
 
     // render
-    function render() {
+    function animate() {
       camera.lookAt(scene.position);
       renderer.render(scene, camera);
-      requestAnimationFrame(render);
+      requestAnimationFrame(animate);
     }
 
   </script>
