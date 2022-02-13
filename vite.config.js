@@ -1,6 +1,7 @@
 const { resolve } = require('path')
 
 export default {
+    base: '/CovidVaccine/',
     build: {
         chunkSizeWarningLimit: 700,
         rollupOptions: {
@@ -12,6 +13,5 @@ export default {
                 main: resolve(__dirname, 'main.html')
             }
         }
-    },
-    base: '/CovidVaccine/'
+    }
 }
