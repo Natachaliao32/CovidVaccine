@@ -7,4 +7,4 @@ We asked ourselves the question : Do fake news impact vaccination rates? We repr
 
 ## See the project
 
-You can see the website here : https://natachaliao32.github.io/CovidVaccine/
+You can see the website here : https://natachaliao.github.io/CovidVaccine/
